@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>日本史一問一答</title>
+
+  <!-- Tailwind CDN（React 版の見た目を再現） -->
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-indigo-500 to-purple-600 p-4 flex items-center justify-center">
+
+  <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-2xl w-full">
+    <div class="flex justify-between items-center mb-6">
+      <h1 class="text-3xl font-bold text-gray-800">日本史一問一答</h1>
+      <button id="restartBtn" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+        最初から
+      </button>
+    </div>
+
+    <div class="flex justify-between text-sm text-gray-600 mb-6">
+      <div id="progress">問題 0 / 0</div>
+      <div id="score" class="font-bold text-indigo-600">正解数: 0 / 0</div>
+    </div>
+
+    <div id="quizArea"></div>
+  </div>
+
+  <script>
+    const questions = [
+      { q: '1192年に征夷大将軍に任命され、鎌倉幕府を開いた人物は？', a: '源頼朝' },
+      { q: '1467年に始まり、約11年間続いた戦乱を何という？', a: '応仁の乱' },
+      { q: '1603年に江戸幕府を開いた人物は？', a: '徳川家康' },
+      { q: '1868年に明治天皇が発した、天皇親政への復帰を宣言した詔は？', a: '五箇条の御誓文' },
+      { q: '645年に中大兄皇子と中臣鎌足が蘇我氏を倒した事件を何という？', a: '大化の改新' },
+      { q: '794年に桓武天皇が遷都した都の名前は？', a: '平安京' },
+      { q: '1274年と1281年の二度にわたるモンゴル軍の襲来を何という？', a: '元寇' },
+      { q: '1549年に日本にキリスト教を伝えた宣教師は？', a: 'フランシスコ・ザビエル' },
+      { q: '1600年に起こった天下分け目の戦いは？', a: '関ヶ原の戦い' },
+      { q: '1853年に浦賀に来航し、開国を迫ったアメリカの提督は？', a: 'ペリー' },
+      { q: '1894年に始まった日本と清の戦争は？', a: '日清戦争' },
+      { q: '1904年に始まった日本とロシアの戦争は？', a: '日露戦争' },
+      { q: '1945年8月6日に原爆が投下された都市は？', a: '広島' },
+      { q: '710年に遷都された都の名前は？', a: '平城京' },
+      { q: '1185年に壇ノ浦の戦いで滅亡した一族は？', a: '平氏' }
+    ];
+
+    let shuffled = [];
+    let idx = 0;
+    let showAns = false;
+    let correct = 0;
+    let total = 0;
+
+    const quizArea = document.getElementById("quizArea");
+    const progress = document.getElementById("progress");
+    const score = document.getElementById("score");
+
+    function restart() {
+      shuffled = [...questions].sort(() => Math.random() - 0.5);
+      idx = 0;
+      showAns = false;
+      correct = 0;
+      total = 0;
+      render();
+    }
+
+    function judge(isCorrect) {
+      if (isCorrect) correct++;
+      total++;
+
+      if (idx < shuffled.length - 1) {
+        idx++;
+        showAns = false;
+        render();
+      } else {
+        renderResult();
+      }
+    }
+
+    function render() {
+      const current = shuffled[idx];
+      progress.textContent = `問題 ${idx + 1} / ${shuffled.length}`;
+      score.textContent = `正解数: ${correct} / ${total}`;
+
+      quizArea.innerHTML = `
+        <div class="bg-indigo-50 rounded-xl p-6 mb-6 min-h-32 flex items-center">
+          <p class="text-lg text-gray-800">${current.q}</p>
+        </div>
+
+        ${
+          !showAns
+            ? `<button id="showBtn" class="w-full py-4 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700">
+                 答えを見る
+               </button>`
+            : `
+              <div class="bg-green-50 border-2 border-green-300 rounded-xl p-6 mb-6">
+                <div class="text-sm text-green-700 font-bold mb-2">答え</div>
+                <p class="text-2xl text-green-900 font-bold">${current.a}</p>
+              </div>
+
+              <div class="grid grid-cols-2 gap-4">
+                <button id="wrongBtn" class="py-4 bg-red-100 text-red-700 rounded-xl font-bold hover:bg-red-200">
+                  不正解
+                </button>
+                <button id="correctBtn" class="py-4 bg-green-600 text-white rounded-xl font-bold hover:bg-green-700">
+                  正解
+                </button>
+              </div>
+            `
+        }
+      `;
+
+      if (!showAns) {
+        document.getElementById("showBtn").onclick = () => {
+          showAns = true;
+          render();
+        };
+      } else {
+        document.getElementById("wrongBtn").onclick = () => judge(false);
+        document.getElementById("correctBtn").onclick = () => judge(true);
+      }
+    }
+
+    function renderResult() {
+      progress.textContent = "";
+      score.textContent = "";
+
+      quizArea.innerHTML = `
+        <div class="text-center py-8">
+          <div class="text-6xl mb-4">🎉</div>
+          <h2 class="text-3xl font-bold text-gray-800 mb-4">お疲れ様！</h2>
+          <div class="text-5xl font-bold text-indigo-600 mb-6">${correct} / ${total}</div>
+          <div class="text-xl text-gray-600 mb-8">正答率: ${Math.round((correct / total) * 100)}%</div>
+          <button id="retryBtn" class="px-8 py-4 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700">
+            もう一度挑戦
+          </button>
+        </div>
+      `;
+
+      document.getElementById("retryBtn").onclick = restart;
+    }
+
+    document.getElementById("restartBtn").onclick = restart;
+
+    // 初期化
+    restart();
+  </script>
+</body>
+</html>
